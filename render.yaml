@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: findme-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+    plan: free
+
+  - type: web
+    name: findme-ai
+    env: python
+    rootDir: ai-service
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    plan: free
+
+  - type: web
+    name: findme-frontend
+    env: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    plan: free
