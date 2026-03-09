@@ -19,7 +19,26 @@ services:
     name: findme-frontendservices:
   - type: web
     name: findme-backend
+    env: nodeservices:
+  - type: web
+    name: findme-backend
     env: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+
+  - type: web
+    name: findme-ai
+    env: python
+    rootDir: ai-service
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+
+  - type: static
+    name: findme-frontend
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
     rootDir: backend
     buildCommand: npm install
     startCommand: node server.js
