@@ -1,21 +1,107 @@
 services:
+  # Backend Service
   - type: web
     name: findme-backend
     env: node
+    region: oregon
+    plan: free
     rootDir: backend
     buildCommand: npm install
-    startCommand: node server.js
+    startCommand: node src/server.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRE
+        value: 7d
+      - key: BCRYPT_SALT_ROUNDS
+        value: 12
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: AI_SERVICE_URL
+        fromService:
+          type: web
+          name: findme-ai
+          property: host
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: EMAIL_FROM
+        value: FindMe <noreply@findme.com>
+      - key: FRONTEND_URL
+        fromService:
+          type: web
+          name: findme-frontend
+          property: host
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false
+      - key: FIREBASE_CLIENT_EMAIL
+        sync: false
 
+  # AI Service
   - type: web
     name: findme-ai
     env: python
+    region: oregon
+    plan: free
     rootDir: ai-service
     buildCommand: pip install -r requirements.txt
-    startCommand: python app.py
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 120 app:app
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 5001
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        value: /etc/secrets/google-credentials.json
 
+  # Frontend Service
   - type: web
     name: findme-frontend
-    env: node
+    env: static
+    region: oregon
+    plan: free
     rootDir: frontend
     buildCommand: npm install && npm run build
-    startCommand: npm run preview
+    staticPublishPath: build
+    envVars:
+      - key: REACT_APP_API_URL
+        fromService:
+          type: web
+          name: findme-backend
+          property: host
+      - key: REACT_APP_SOCKET_URL
+        fromService:
+          type: web
+          name: findme-backend
+          property: host
+      - key: REACT_APP_FIREBASE_API_KEY
+        sync: false
+      - key: REACT_APP_FIREBASE_AUTH_DOMAIN
+        sync: false
+      - key: REACT_APP_FIREBASE_PROJECT_ID
+        sync: false
+      - key: REACT_APP_FIREBASE_STORAGE_BUCKET
+        sync: false
+      - key: REACT_APP_FIREBASE_MESSAGING_SENDER_ID
+        sync: false
+      - key: REACT_APP_FIREBASE_APP_ID
+        sync: false
+      - key: REACT_APP_FIREBASE_VAPID_KEY
+        sync: false
