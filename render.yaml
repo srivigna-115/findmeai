@@ -5,27 +5,6 @@ services:
     rootDir: backend
     buildCommand: npm install
     startCommand: node server.js
-    plan: free
-
-  - type: web
-    name: findme-ai
-    env: python
-    rootDir: ai-service
-    buildCommand: pip install -r requirements.txt
-    startCommand: python app.py
-    plan: free
-
-  - type: web
-    name: findme-frontendservices:
-  - type: web
-    name: findme-backend
-    env: nodeservices:
-  - type: web
-    name: findme-backend
-    env: node
-    rootDir: backend
-    buildCommand: npm install
-    startCommand: node server.js
 
   - type: web
     name: findme-ai
@@ -36,66 +15,6 @@ services:
 
   - type: static
     name: findme-frontend
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    staticPublishPath: dist
-    rootDir: backend
-    buildCommand: npm install
-    startCommand: node server.js
-
-  - type: web
-    name: findme-ai
-    env: python
-    rootDir: ai-service
-    buildCommand: pip install -r requirements.txt
-    startCommand: python app.py
-
-  - type: static
-    name: findme-frontend
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    staticPublishPath: dist
-    env: staticservices:
-  - type: web
-    name: findme-backend
-    env: node
-    rootDir: backend
-    buildCommand: npm install
-    startCommand: node server.js
-
-  - type: web
-    name: findme-ai
-    env: python
-    rootDir: ai-service
-    buildCommand: pip install -r requirements.txt
-    startCommand: python app.py
-
-  - type: static
-    name: findme-frontend
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    staticPublishPath: dist
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    staticPublishPath: dist
-    plan: freeservices:
-  - type: web
-    name: findme-backend
-    env: node
-    rootDir: backend
-    buildCommand: npm install
-    startCommand: node server.js
-
-  - type: web
-    name: findme-ai
-    env: python
-    rootDir: ai-service
-    buildCommand: pip install -r requirements.txt
-    startCommand: python app.py
-
-  - type: web
-    name: findme-frontend
-    env: static
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
