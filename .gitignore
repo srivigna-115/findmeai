@@ -103,7 +103,6 @@ backend/uploads/
 *_NOW.md
 *_READY.md
 *_SUCCESS.md
-*_GUIDE.md
 *_STATUS.md
 *_ISSUES*.md
 *_FIXES.md
@@ -112,7 +111,6 @@ backend/uploads/
 *_DEBUG*.md
 *_REFERENCE.md
 *_TEST*.md
-QUICK_*.md
 SETUP_*.md
 WHY_*.md
 POST_*.md
