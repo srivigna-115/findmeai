@@ -10,6 +10,7 @@ const MyItems = () => {
   const [filter, setFilter] = useState('all'); // all, lost, found
   const [editingItem, setEditingItem] = useState(null);
   const [editForm, setEditForm] = useState({});
+  const [lightboxImage, setLightboxImage] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -93,6 +94,57 @@ const MyItems = () => {
 
   return (
     <div style={{ maxWidth: '1200px', margin: '2rem auto', padding: '0 2rem' }}>
+      {/* Image Lightbox Modal */}
+      {lightboxImage && (
+        <div
+          onClick={() => setLightboxImage(null)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.9)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            cursor: 'pointer'
+          }}
+        >
+          <img
+            src={lightboxImage}
+            alt="Full size"
+            style={{
+              maxWidth: '90%',
+              maxHeight: '90%',
+              objectFit: 'contain'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button
+            onClick={() => setLightboxImage(null)}
+            style={{
+              position: 'absolute',
+              top: '20px',
+              right: '20px',
+              background: 'white',
+              border: 'none',
+              borderRadius: '50%',
+              width: '40px',
+              height: '40px',
+              fontSize: '24px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1 style={{ color: '#2c3e50', marginBottom: '0.5rem' }}>My Items</h1>
@@ -323,17 +375,24 @@ const MyItems = () => {
                     backgroundColor: '#f5f5f5',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
+                    justifyContent: 'center',
+                    cursor: item.imageUrl ? 'pointer' : 'default'
+                  }}
+                  onClick={() => item.imageUrl && setLightboxImage(`http://localhost:5000${item.imageUrl}`)}
+                  >
                     {item.imageUrl ? (
                       <img
-                        src={item.imageUrl.startsWith('http') ? item.imageUrl : `http://localhost:5000${item.imageUrl}`}
+                        src={`http://localhost:5000${item.imageUrl}`}
                         alt={item.title}
                         style={{
                           width: '100%',
                           height: '100%',
-                          objectFit: 'cover',
-                          display: 'block'
+                          objectFit: 'cover'
+                        }}
+                        onError={(e) => {
+                          console.error('Item image failed:', e.target.src);
+                          e.target.style.display = 'none';
+                          e.target.parentElement.innerHTML = '<div style="font-size:3rem">❌</div>';
                         }}
                       />
                     ) : (

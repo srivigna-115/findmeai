@@ -15,9 +15,10 @@ const Notifications = () => {
   const fetchNotifications = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/notifications`, {
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/notifications`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      console.log('Notifications fetched:', res.data);
       setNotifications(res.data.notifications || []);
     } catch (error) {
       console.error('Error fetching notifications:', error);
@@ -29,8 +30,8 @@ const Notifications = () => {
   const markAsRead = async (notificationId) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.patch(
-        `${process.env.REACT_APP_API_URL}/api/notifications/${notificationId}/read`,
+      await axios.put(
+        `${process.env.REACT_APP_API_URL}/notifications/${notificationId}/read`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -46,8 +47,8 @@ const Notifications = () => {
   const markAllAsRead = async () => {
     try {
       const token = localStorage.getItem('token');
-      await axios.patch(
-        `${process.env.REACT_APP_API_URL}/api/notifications/read-all`,
+      await axios.put(
+        `${process.env.REACT_APP_API_URL}/notifications/read-all`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -62,7 +63,7 @@ const Notifications = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.delete(
-        `${process.env.REACT_APP_API_URL}/api/notifications/${notificationId}`,
+        `${process.env.REACT_APP_API_URL}/notifications/${notificationId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
@@ -77,9 +78,11 @@ const Notifications = () => {
       markAsRead(notification._id);
     }
     
+    // Only navigate if there's a link
     if (notification.link) {
       navigate(notification.link);
     }
+    // If no link, notification is just informational (user should check email)
   };
 
   const getFilteredNotifications = () => {

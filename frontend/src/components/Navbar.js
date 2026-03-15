@@ -107,7 +107,7 @@ const Navbar = () => {
             <div className="notification-bell-container" ref={dropdownRef}>
               <button 
                 className="notification-bell"
-                onClick={() => setShowDropdown(!showDropdown)}
+                onClick={() => navigate('/notifications')}
                 style={{
                   background: 'transparent',
                   border: 'none',
@@ -138,134 +138,6 @@ const Navbar = () => {
                   </span>
                 )}
               </button>
-
-              {/* Notification Dropdown */}
-              {showDropdown && (
-                <div style={{
-                  position: 'absolute',
-                  top: '100%',
-                  right: '0',
-                  marginTop: '8px',
-                  width: '350px',
-                  maxHeight: '400px',
-                  overflowY: 'auto',
-                  background: 'white',
-                  border: '1px solid #ddd',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                  zIndex: 1000
-                }}>
-                  <div style={{
-                    padding: '12px 16px',
-                    borderBottom: '1px solid #eee',
-                    fontWeight: 'bold',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                  }}>
-                    <span>Notifications</span>
-                    {unreadCount > 0 && (
-                      <span style={{
-                        background: '#e74c3c',
-                        color: 'white',
-                        borderRadius: '12px',
-                        padding: '2px 8px',
-                        fontSize: '0.8rem'
-                      }}>
-                        {unreadCount} new
-                      </span>
-                    )}
-                  </div>
-
-                  {notifications.length === 0 ? (
-                    <div style={{
-                      padding: '32px 16px',
-                      textAlign: 'center',
-                      color: '#999'
-                    }}>
-                      <div style={{ fontSize: '2rem', marginBottom: '8px' }}>🔔</div>
-                      <div>No notifications yet</div>
-                    </div>
-                  ) : (
-                    <div>
-                      {notifications.map(notification => (
-                        <div
-                          key={notification._id}
-                          onClick={() => handleNotificationClick(notification)}
-                          style={{
-                            padding: '12px 16px',
-                            borderBottom: '1px solid #f0f0f0',
-                            cursor: 'pointer',
-                            background: notification.read ? 'white' : '#e3f2fd',
-                            transition: 'background 0.2s'
-                          }}
-                          onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'}
-                          onMouseLeave={(e) => e.currentTarget.style.background = notification.read ? 'white' : '#e3f2fd'}
-                        >
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'flex-start',
-                            gap: '8px'
-                          }}>
-                            <div style={{ fontSize: '1.5rem', flexShrink: 0 }}>
-                              {notification.type === 'match' ? '🎯' : '📢'}
-                            </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{
-                                fontWeight: notification.read ? 'normal' : 'bold',
-                                fontSize: '0.9rem',
-                                marginBottom: '4px'
-                              }}>
-                                {notification.title}
-                              </div>
-                              <div style={{
-                                fontSize: '0.85rem',
-                                color: '#666',
-                                marginBottom: '4px'
-                              }}>
-                                {notification.message}
-                              </div>
-                              <div style={{
-                                fontSize: '0.75rem',
-                                color: '#999'
-                              }}>
-                                {formatTimeAgo(notification.createdAt)}
-                              </div>
-                            </div>
-                            {!notification.read && (
-                              <div style={{
-                                width: '8px',
-                                height: '8px',
-                                background: '#3498db',
-                                borderRadius: '50%',
-                                flexShrink: 0,
-                                marginTop: '4px'
-                              }} />
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                      
-                      <div
-                        onClick={() => {
-                          setShowDropdown(false);
-                          navigate('/notifications');
-                        }}
-                        style={{
-                          padding: '12px 16px',
-                          textAlign: 'center',
-                          color: '#3498db',
-                          cursor: 'pointer',
-                          fontWeight: '500',
-                          fontSize: '0.9rem'
-                        }}
-                      >
-                        View all notifications
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
 
             <span className="nav-user">Hi, {user.name}</span>

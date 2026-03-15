@@ -52,22 +52,22 @@ exports.sendMatchNotifications = async (match) => {
     const chatLink = `/chat/${match.chatRoomId}`;
     const fullChatLink = `${process.env.CLIENT_URL}${chatLink}`;
 
-    // Create in-app notifications
+    // Create in-app notifications (without chat link - link is only in email)
     await Promise.all([
       Notification.create({
         user: lostUser._id,
         type: 'match',
-        title: 'Match Found!',
-        message: `You got a match! Check your email for the chat link.`,
-        link: chatLink,
+        title: '🎉 Match Found!',
+        message: `We found a potential match for your lost "${lostItem.title}"! Match score: ${(match.matchScore * 100).toFixed(0)}%. Check your email for the chat link to connect with ${foundUser.name}.`,
+        link: null, // No link in notification - only in email
         data: { matchId: match._id, chatRoomId: match.chatRoomId }
       }),
       Notification.create({
         user: foundUser._id,
         type: 'match',
-        title: 'Match Found!',
-        message: `You got a match! Check your email for the chat link.`,
-        link: chatLink,
+        title: '🎉 Match Found!',
+        message: `Your found "${foundItem.title}" matches ${lostUser.name}'s lost item! Match score: ${(match.matchScore * 100).toFixed(0)}%. Check your email for the chat link.`,
+        link: null, // No link in notification - only in email
         data: { matchId: match._id, chatRoomId: match.chatRoomId }
       })
     ]);

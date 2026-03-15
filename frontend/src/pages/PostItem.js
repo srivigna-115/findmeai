@@ -12,15 +12,23 @@ const PostItem = () => {
     verificationInfo: '',
     category: 'electronics',
     date: '',
-    address: '',
-    lat: '',
-    lng: ''
+    address: ''
   });
   const [image, setImage] = useState(null);
   const [useVoice, setUseVoice] = useState(false);
   const [loading, setLoading] = useState(false);
   
-  const { isRecording, audioBlob, startRecording, stopRecording, resetRecording } = useVoiceRecording();
+  const { 
+    isRecording, 
+    audioBlob, 
+    transcript, 
+    interimTranscript, 
+    isTranscribing,
+    startRecording, 
+    stopRecording, 
+    resetRecording,
+    getServerTranscription 
+  } = useVoiceRecording();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -39,7 +47,11 @@ const PostItem = () => {
       const data = new FormData();
       data.append('type', formData.type);
       data.append('title', formData.title);
-      data.append('description', formData.description);
+      
+      // Use transcript as description if voice recording was used
+      const description = useVoice && transcript ? transcript : formData.description;
+      data.append('description', description);
+      
       if (formData.verificationInfo) {
         data.append('verificationInfo', formData.verificationInfo);
       }
@@ -48,8 +60,8 @@ const PostItem = () => {
       data.append('location', JSON.stringify({
         address: formData.address,
         coordinates: {
-          lat: parseFloat(formData.lat) || 0,
-          lng: parseFloat(formData.lng) || 0
+          lat: 0,
+          lng: 0
         }
       }));
 
@@ -140,31 +152,6 @@ const PostItem = () => {
           />
         </div>
 
-        <div className="form-row">
-          <div className="form-group">
-            <label>Latitude (optional)</label>
-            <input
-              type="number"
-              step="any"
-              name="lat"
-              value={formData.lat}
-              onChange={handleChange}
-              placeholder="40.785091"
-            />
-          </div>
-          <div className="form-group">
-            <label>Longitude (optional)</label>
-            <input
-              type="number"
-              step="any"
-              name="lng"
-              value={formData.lng}
-              onChange={handleChange}
-              placeholder="-73.968285"
-            />
-          </div>
-        </div>
-
         <div className="form-group">
           <label>
             <input
@@ -209,27 +196,122 @@ const PostItem = () => {
           </>
         ) : (
           <div className="form-group">
-            <label>Voice Recording</label>
+            <label>Voice Recording & Transcription</label>
             <div className="voice-recorder">
+              {/* Browser compatibility check */}
+              {!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window) && (
+                <div className="browser-warning" style={{ 
+                  background: '#fff3cd', 
+                  border: '1px solid #ffc107', 
+                  padding: '10px', 
+                  borderRadius: '5px',
+                  marginBottom: '10px',
+                  color: '#856404'
+                }}>
+                  ⚠️ Real-time transcription not supported in this browser. 
+                  Voice will be recorded and transcribed on the server.
+                </div>
+              )}
+
               {!isRecording && !audioBlob && (
                 <button type="button" onClick={startRecording} className="btn-record">
-                  Start Recording
+                  🎤 Start Recording
                 </button>
               )}
               {isRecording && (
-                <button type="button" onClick={stopRecording} className="btn-stop">
-                  Stop Recording
-                </button>
-              )}
-              {audioBlob && (
                 <div>
-                  <audio src={URL.createObjectURL(audioBlob)} controls />
-                  <button type="button" onClick={resetRecording} className="btn-reset">
-                    Re-record
+                  <button type="button" onClick={stopRecording} className="btn-stop">
+                    ⏹️ Stop Recording
                   </button>
+                  <div className="recording-indicator">
+                    <span className="pulse-dot"></span>
+                    Recording...
+                  </div>
+                </div>
+              )}
+              
+              {/* Real-time transcription display */}
+              {(transcript || interimTranscript) && (
+                <div className="transcription-display">
+                  <label>Live Transcription:</label>
+                  <div className="transcript-box">
+                    <span className="final-transcript">{transcript}</span>
+                    <span className="interim-transcript">{interimTranscript}</span>
+                    {isRecording && <span className="cursor">|</span>}
+                  </div>
+                </div>
+              )}
+
+              {audioBlob && (
+                <div className="audio-controls">
+                  <audio src={URL.createObjectURL(audioBlob)} controls />
+                  <div className="audio-actions">
+                    <button type="button" onClick={resetRecording} className="btn-reset">
+                      🔄 Re-record
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={async () => {
+                        const serverTranscript = await getServerTranscription(audioBlob);
+                        if (serverTranscript && serverTranscript !== transcript) {
+                          setFormData(prev => ({ 
+                            ...prev, 
+                            description: serverTranscript 
+                          }));
+                          toast.info('Updated with more accurate transcription');
+                        }
+                      }}
+                      className="btn-transcribe"
+                      disabled={isTranscribing}
+                    >
+                      {isTranscribing ? '🔄 Processing...' : '🎯 Get Accurate Transcription'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Hidden description field that gets populated with transcript */}
+              {transcript && (
+                <div className="form-group" style={{ marginTop: '1rem' }}>
+                  <label>Description (from voice):</label>
+                  <textarea
+                    name="description"
+                    value={transcript}
+                    onChange={(e) => {
+                      setFormData({ ...formData, description: e.target.value });
+                      // Update transcript if user edits
+                      if (e.target.value !== transcript) {
+                        // Allow manual editing
+                      }
+                    }}
+                    rows="4"
+                    placeholder="Your voice will be transcribed here..."
+                    style={{ backgroundColor: '#f8f9fa' }}
+                  />
+                  <small style={{ color: '#6c757d' }}>
+                    ✏️ You can edit the transcription above if needed
+                  </small>
                 </div>
               )}
             </div>
+            
+            {/* Verification Info for Lost Items (Voice Mode) */}
+            {formData.type === 'lost' && (
+              <div className="form-group" style={{ marginTop: '1rem' }}>
+                <label>Verification Information (Optional but Recommended)</label>
+                <textarea
+                  name="verificationInfo"
+                  value={formData.verificationInfo}
+                  onChange={handleChange}
+                  rows="3"
+                  placeholder="Add specific details to verify ownership (e.g., unique marks, serial number, what's inside, etc.). This will be shared with the finder to confirm it's your item."
+                  style={{ backgroundColor: '#fff3cd', borderColor: '#ffc107' }}
+                />
+                <small style={{ color: '#856404', display: 'block', marginTop: '0.5rem' }}>
+                  💡 This information helps verify you're the real owner when someone finds your item
+                </small>
+              </div>
+            )}
           </div>
         )}
 

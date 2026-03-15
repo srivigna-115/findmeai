@@ -8,6 +8,7 @@ const Matches = () => {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // all, pending, accepted
+  const [lightboxImage, setLightboxImage] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -58,6 +59,57 @@ const Matches = () => {
 
   return (
     <div style={{ maxWidth: '1200px', margin: '2rem auto', padding: '0 2rem' }}>
+      {/* Image Lightbox Modal */}
+      {lightboxImage && (
+        <div
+          onClick={() => setLightboxImage(null)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.9)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            cursor: 'pointer'
+          }}
+        >
+          <img
+            src={lightboxImage}
+            alt="Full size"
+            style={{
+              maxWidth: '90%',
+              maxHeight: '90%',
+              objectFit: 'contain'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button
+            onClick={() => setLightboxImage(null)}
+            style={{
+              position: 'absolute',
+              top: '20px',
+              right: '20px',
+              background: 'white',
+              border: 'none',
+              borderRadius: '50%',
+              width: '40px',
+              height: '40px',
+              fontSize: '24px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       <div style={{ marginBottom: '2rem' }}>
         <h1 style={{ color: '#2c3e50', marginBottom: '0.5rem' }}>Your Matches</h1>
         <p style={{ color: '#7f8c8d' }}>
@@ -248,17 +300,24 @@ const Matches = () => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      height: '150px'
-                    }}>
+                      height: '150px',
+                      cursor: match.lostItem?.imageUrl ? 'pointer' : 'default'
+                    }}
+                    onClick={() => match.lostItem?.imageUrl && setLightboxImage(`http://localhost:5000${match.lostItem.imageUrl}`)}
+                    >
                       {match.lostItem?.imageUrl ? (
                         <img 
-                          src={match.lostItem.imageUrl.startsWith('http') ? match.lostItem.imageUrl : `http://localhost:5000${match.lostItem.imageUrl}`}
+                          src={`http://localhost:5000${match.lostItem.imageUrl}`}
                           alt={match.lostItem.title}
                           style={{
                             width: '100%',
                             height: '100%',
-                            objectFit: 'cover',
-                            display: 'block'
+                            objectFit: 'cover'
+                          }}
+                          onError={(e) => {
+                            console.error('Lost image failed:', e.target.src);
+                            e.target.style.display = 'none';
+                            e.target.parentElement.innerHTML = '<div style="font-size:3rem">❌</div>';
                           }}
                         />
                       ) : (
@@ -322,17 +381,24 @@ const Matches = () => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      height: '150px'
-                    }}>
+                      height: '150px',
+                      cursor: match.foundItem?.imageUrl ? 'pointer' : 'default'
+                    }}
+                    onClick={() => match.foundItem?.imageUrl && setLightboxImage(`http://localhost:5000${match.foundItem.imageUrl}`)}
+                    >
                       {match.foundItem?.imageUrl ? (
                         <img 
-                          src={match.foundItem.imageUrl.startsWith('http') ? match.foundItem.imageUrl : `http://localhost:5000${match.foundItem.imageUrl}`}
+                          src={`http://localhost:5000${match.foundItem.imageUrl}`}
                           alt={match.foundItem.title}
                           style={{
                             width: '100%',
                             height: '100%',
-                            objectFit: 'cover',
-                            display: 'block'
+                            objectFit: 'cover'
+                          }}
+                          onError={(e) => {
+                            console.error('Found image failed:', e.target.src);
+                            e.target.style.display = 'none';
+                            e.target.parentElement.innerHTML = '<div style="font-size:3rem">❌</div>';
                           }}
                         />
                       ) : (

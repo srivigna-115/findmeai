@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const Message = require('../models/Message');
 const Match = require('../models/Match');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 
 const connectedUsers = new Map();
 
@@ -81,6 +82,30 @@ exports.initializeSocket = (io) => {
           .populate('sender', 'name');
 
         io.to(chatRoomId).emit('new-message', populatedMessage);
+
+        // Create notification for the other user
+        try {
+          const match = await Match.findOne({ chatRoomId });
+          if (match) {
+            const recipientId = match.lostUser.toString() === socket.userId 
+              ? match.foundUser 
+              : match.lostUser;
+
+            // Always create notification for new messages (without showing message content)
+            await Notification.create({
+              user: recipientId,
+              type: 'message',
+              title: '💬 New Message',
+              message: `You have a new message from ${socket.userName}. Click to view the chat.`,
+              link: `/chat/${chatRoomId}`,
+              data: { chatRoomId, messageId: message._id }
+            });
+            
+            console.log(`✅ Created message notification for user ${recipientId}`);
+          }
+        } catch (notifError) {
+          console.error('Notification creation error:', notifError);
+        }
       } catch (error) {
         socket.emit('error', { message: 'Failed to send message' });
       }
