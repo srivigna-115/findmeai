@@ -62,6 +62,10 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', service: 'FindMe Backend' });
+});
+
 // Serve React frontend build (for ngrok / single-port sharing)
 const frontendBuild = path.join(__dirname, '../../frontend/build');
 if (require('fs').existsSync(frontendBuild)) {

@@ -9,6 +9,10 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
+@app.route('/', methods=['GET'])
+def index():
+    return jsonify({'status': 'ok', 'service': 'FindMe AI Service'}), 200
+
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({'status': 'ok', 'service': 'AI Service (Simplified)'}), 200
