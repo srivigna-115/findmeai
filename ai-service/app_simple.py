@@ -143,6 +143,5 @@ def transcribe():
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5001))
-    print(f"🤖 Starting AI Service (Simplified Mode) on port {port}")
-    print("📝 Note: Using mock embeddings. Install PyTorch + Transformers for real AI features.")
-    app.run(host='0.0.0.0', port=port, debug=os.getenv('FLASK_ENV') == 'development')
+    print(f"🤖 Starting AI Service on port {port}", flush=True)
+    app.run(host='0.0.0.0', port=port, debug=False)
