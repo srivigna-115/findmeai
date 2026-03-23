@@ -4,11 +4,11 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y gcc g++ && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY ai-service/requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY ai-service/ .
 
 EXPOSE 5001
 
