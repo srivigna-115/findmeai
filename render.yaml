@@ -12,8 +12,6 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 5000
       - key: MONGODB_URI
         sync: false
       - key: JWT_SECRET
@@ -22,17 +20,8 @@ services:
         value: 7d
       - key: BCRYPT_SALT_ROUNDS
         value: 12
-      - key: CLOUDINARY_CLOUD_NAME
-        sync: false
-      - key: CLOUDINARY_API_KEY
-        sync: false
-      - key: CLOUDINARY_API_SECRET
-        sync: false
       - key: AI_SERVICE_URL
-        fromService:
-          type: web
-          name: findme-ai
-          property: host
+        value: https://findme-ai.onrender.com
       - key: SMTP_HOST
         value: smtp.gmail.com
       - key: SMTP_PORT
@@ -43,17 +32,10 @@ services:
         sync: false
       - key: EMAIL_FROM
         value: FindMe <noreply@findme.com>
-      - key: FRONTEND_URL
-        fromService:
-          type: web
-          name: findme-frontend
-          property: host
-      - key: FIREBASE_PROJECT_ID
-        sync: false
-      - key: FIREBASE_PRIVATE_KEY
-        sync: false
-      - key: FIREBASE_CLIENT_EMAIL
-        sync: false
+      - key: IMAGE_SIMILARITY_THRESHOLD
+        value: 0.78
+      - key: TEXT_SIMILARITY_THRESHOLD
+        value: 0.10
 
   # AI Service
   - type: web
@@ -63,13 +45,11 @@ services:
     plan: free
     rootDir: ai-service
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 120 app:app
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 1 --timeout 120 app_simple:app
     healthCheckPath: /health
     envVars:
-      - key: PORT
-        value: 5001
-      - key: GOOGLE_APPLICATION_CREDENTIALS
-        value: /etc/secrets/google-credentials.json
+      - key: FLASK_ENV
+        value: production
 
   # Frontend Service
   - type: web
@@ -82,26 +62,6 @@ services:
     staticPublishPath: build
     envVars:
       - key: REACT_APP_API_URL
-        fromService:
-          type: web
-          name: findme-backend
-          property: host
+        value: https://findme-backend.onrender.com/api
       - key: REACT_APP_SOCKET_URL
-        fromService:
-          type: web
-          name: findme-backend
-          property: host
-      - key: REACT_APP_FIREBASE_API_KEY
-        sync: false
-      - key: REACT_APP_FIREBASE_AUTH_DOMAIN
-        sync: false
-      - key: REACT_APP_FIREBASE_PROJECT_ID
-        sync: false
-      - key: REACT_APP_FIREBASE_STORAGE_BUCKET
-        sync: false
-      - key: REACT_APP_FIREBASE_MESSAGING_SENDER_ID
-        sync: false
-      - key: REACT_APP_FIREBASE_APP_ID
-        sync: false
-      - key: REACT_APP_FIREBASE_VAPID_KEY
-        sync: false
+        value: https://findme-backend.onrender.com

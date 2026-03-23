@@ -15,9 +15,11 @@ dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
+
 const io = socketIo(server, {
   cors: {
-    origin: process.env.CLIENT_URL,
+    origin: "*",
+    methods: ["GET", "POST"],
     credentials: true
   }
 });
@@ -29,13 +31,18 @@ connectDB();
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
+
+app.use(cors({
+  origin: "*",
+  credentials: true
+}));
+
 app.use(compression());
 app.use(morgan('combined'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve uploaded files with CORS headers
+// Serve uploaded files
 app.use('/uploads', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Cross-Origin-Resource-Policy', 'cross-origin');
@@ -55,10 +62,22 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Serve React frontend build (for ngrok / single-port sharing)
+const frontendBuild = path.join(__dirname, '../../frontend/build');
+if (require('fs').existsSync(frontendBuild)) {
+  app.use(express.static(frontendBuild));
+  app.get('*', (req, res) => {
+    if (!req.path.startsWith('/api') && !req.path.startsWith('/uploads')) {
+      res.sendFile(path.join(frontendBuild, 'index.html'));
+    }
+  });
+  console.log('✅ Serving React frontend from build folder');
+}
+
 // Socket.io initialization
 initializeSocket(io);
 
-// Error handler (must be last)
+// Error handler
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
@@ -67,4 +86,4 @@ server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-module.exports = { app, server, io };
+module.exports = { app, server, io }; 

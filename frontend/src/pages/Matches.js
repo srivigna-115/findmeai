@@ -303,11 +303,11 @@ const Matches = () => {
                       height: '150px',
                       cursor: match.lostItem?.imageUrl ? 'pointer' : 'default'
                     }}
-                    onClick={() => match.lostItem?.imageUrl && setLightboxImage(`http://localhost:5000${match.lostItem.imageUrl}`)}
+                    onClick={() => match.lostItem?.imageUrl && setLightboxImage(`${process.env.REACT_APP_SOCKET_URL}${match.lostItem.imageUrl}`)}
                     >
                       {match.lostItem?.imageUrl ? (
                         <img 
-                          src={`http://localhost:5000${match.lostItem.imageUrl}`}
+                          src={`${process.env.REACT_APP_SOCKET_URL}${match.lostItem.imageUrl}`}
                           alt={match.lostItem.title}
                           style={{
                             width: '100%',
@@ -384,11 +384,11 @@ const Matches = () => {
                       height: '150px',
                       cursor: match.foundItem?.imageUrl ? 'pointer' : 'default'
                     }}
-                    onClick={() => match.foundItem?.imageUrl && setLightboxImage(`http://localhost:5000${match.foundItem.imageUrl}`)}
+                    onClick={() => match.foundItem?.imageUrl && setLightboxImage(`${process.env.REACT_APP_SOCKET_URL}${match.foundItem.imageUrl}`)}
                     >
                       {match.foundItem?.imageUrl ? (
                         <img 
-                          src={`http://localhost:5000${match.foundItem.imageUrl}`}
+                          src={`${process.env.REACT_APP_SOCKET_URL}${match.foundItem.imageUrl}`}
                           alt={match.foundItem.title}
                           style={{
                             width: '100%',

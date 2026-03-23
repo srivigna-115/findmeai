@@ -378,11 +378,11 @@ const MyItems = () => {
                     justifyContent: 'center',
                     cursor: item.imageUrl ? 'pointer' : 'default'
                   }}
-                  onClick={() => item.imageUrl && setLightboxImage(`http://localhost:5000${item.imageUrl}`)}
+                  onClick={() => item.imageUrl && setLightboxImage(`${process.env.REACT_APP_SOCKET_URL}${item.imageUrl}`)}
                   >
                     {item.imageUrl ? (
                       <img
-                        src={`http://localhost:5000${item.imageUrl}`}
+                        src={`${process.env.REACT_APP_SOCKET_URL}${item.imageUrl}`}
                         alt={item.title}
                         style={{
                           width: '100%',

@@ -159,7 +159,7 @@ export const useVoiceRecording = () => {
       const formData = new FormData();
       formData.append('audio', audioBlob, 'recording.webm');
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/transcribe`, {
+      const response = await fetch(`/ai/transcribe`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
