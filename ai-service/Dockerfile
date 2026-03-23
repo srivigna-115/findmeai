@@ -10,4 +10,4 @@ COPY . .
 
 EXPOSE 5001
 
-CMD ["gunicorn", "--bind", "0.0.0.0:$PORT", "--workers", "2", "--timeout", "120", "app_simple:app"]
+CMD gunicorn --bind 0.0.0.0:${PORT:-5001} --workers 2 --timeout 120 app_simple:app
