@@ -55,21 +55,16 @@ exports.findMatches = async (newItem) => {
       const textScore = calculateTextSimilarity(text1, text2, newItem.title, candidate.title);
       console.log(`      Text similarity: ${(textScore * 100).toFixed(2)}%`);
 
-      // Both items have images: Average of image + text similarity
+      // Both items have images: use best of image or text
       if (hasNewItemImage && hasCandidateImage) {
         try {
-          const imageScore = cosineSimilarity(newItem.imageEmbedding, candidate.imageEmbedding);
-          if (isNaN(imageScore) || !isFinite(imageScore)) {
-            throw new Error('Invalid similarity score');
-          }
+          const rawImageScore = cosineSimilarity(newItem.imageEmbedding, candidate.imageEmbedding);
+          const imageScore = Math.max(0, rawImageScore);
           console.log(`      Image similarity: ${(imageScore * 100).toFixed(2)}%`);
-          
-          // Average of both scores
-          matchScore = (imageScore + textScore) / 2;
+          // Use best score between image and text
+          matchScore = Math.max(imageScore, textScore);
           matchType = 'hybrid';
-          console.log(`      Hybrid score (avg): ${(matchScore * 100).toFixed(2)}%`);
         } catch (error) {
-          console.log(`      Image matching failed, using text only: ${error.message}`);
           matchScore = textScore;
           matchType = 'text';
         }
