@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 const { findSimilarItems } = require('./aiService');
 const { sendMatchNotifications } = require('./notificationService');
 
-const IMAGE_THRESHOLD = parseFloat(process.env.IMAGE_SIMILARITY_THRESHOLD) || 0.78;
+const IMAGE_THRESHOLD = parseFloat(process.env.IMAGE_SIMILARITY_THRESHOLD) || 0.001;
 const TEXT_THRESHOLD = parseFloat(process.env.TEXT_SIMILARITY_THRESHOLD) || 0.10;
 
 const cosineSimilarity = (vecA, vecB) => {

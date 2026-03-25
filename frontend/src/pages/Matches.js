@@ -303,11 +303,11 @@ const Matches = () => {
                       height: '150px',
                       cursor: match.lostItem?.imageUrl ? 'pointer' : 'default'
                     }}
-                    onClick={() => match.lostItem?.imageUrl && setLightboxImage(`${process.env.REACT_APP_SOCKET_URL}${match.lostItem.imageUrl}`)}
+                    onClick={() => match.lostItem?.imageUrl && setLightboxImage((match.lostItem.imageUrl.startsWith("http") ? match.lostItem.imageUrl : `${process.env.REACT_APP_SOCKET_URL}${match.lostItem.imageUrl}`))}
                     >
                       {match.lostItem?.imageUrl ? (
                         <img 
-                          src={`${process.env.REACT_APP_SOCKET_URL}${match.lostItem.imageUrl}`}
+                          src={(match.lostItem.imageUrl.startsWith("http") ? match.lostItem.imageUrl : `${process.env.REACT_APP_SOCKET_URL}${match.lostItem.imageUrl}`)}
                           alt={match.lostItem.title}
                           style={{
                             width: '100%',
@@ -384,11 +384,11 @@ const Matches = () => {
                       height: '150px',
                       cursor: match.foundItem?.imageUrl ? 'pointer' : 'default'
                     }}
-                    onClick={() => match.foundItem?.imageUrl && setLightboxImage(`${process.env.REACT_APP_SOCKET_URL}${match.foundItem.imageUrl}`)}
+                    onClick={() => match.foundItem?.imageUrl && setLightboxImage((match.foundItem.imageUrl.startsWith("http") ? match.foundItem.imageUrl : `${process.env.REACT_APP_SOCKET_URL}${match.foundItem.imageUrl}`))}
                     >
                       {match.foundItem?.imageUrl ? (
                         <img 
-                          src={`${process.env.REACT_APP_SOCKET_URL}${match.foundItem.imageUrl}`}
+                          src={(match.foundItem.imageUrl.startsWith("http") ? match.foundItem.imageUrl : `${process.env.REACT_APP_SOCKET_URL}${match.foundItem.imageUrl}`)}
                           alt={match.foundItem.title}
                           style={{
                             width: '100%',
@@ -463,3 +463,4 @@ const Matches = () => {
 };
 
 export default Matches;
+
