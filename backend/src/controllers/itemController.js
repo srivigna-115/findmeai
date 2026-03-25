@@ -41,13 +41,18 @@ exports.createItem = async (req, res, next) => {
 
     // Handle audio upload
     if (req.files && req.files.audio) {
-      const audioUrl = await uploadToCloudinary(req.files.audio[0]);
-      itemData.audioUrl = audioUrl;
-      
-      // Transcribe audio
-      const transcript = await transcribeAudio(audioUrl);
-      itemData.audioTranscript = transcript;
-      itemData.description = transcript; // Use transcript as description
+      try {
+        const audioUrl = await uploadToCloudinary(req.files.audio[0]);
+        itemData.audioUrl = audioUrl;
+        const transcript = await transcribeAudio(audioUrl);
+        itemData.audioTranscript = transcript;
+        // Only use transcript as description if no text description provided
+        if (!itemData.description || itemData.description.trim() === '') {
+          itemData.description = transcript;
+        }
+      } catch (err) {
+        console.log('Audio processing failed:', err.message);
+      }
     }
 
     const item = await Item.create(itemData);
