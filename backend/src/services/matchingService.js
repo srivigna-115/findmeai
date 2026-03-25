@@ -28,7 +28,7 @@ exports.findMatches = async (newItem) => {
       category: newItem.category,
       status: 'active',
       _id: { $ne: newItem._id }
-    });
+    }).populate('user', '_id name email');
 
     console.log(`   Found ${candidates.length} candidate(s)`);
 
@@ -109,8 +109,8 @@ const createMatch = async (item1, item2, matchScore, matchType) => {
     const match = await Match.create({
       lostItem: lostItem._id,
       foundItem: foundItem._id,
-      lostUser: lostItem.user,
-      foundUser: foundItem.user,
+      lostUser: lostItem.user?._id || lostItem.user,
+      foundUser: foundItem.user?._id || foundItem.user,
       matchScore,
       matchType,
       chatRoomId

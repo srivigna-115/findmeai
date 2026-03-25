@@ -27,7 +27,7 @@ const matchSchema = new mongoose.Schema({
   },
   matchType: {
     type: String,
-    enum: ['image', 'text', 'cross-modal'],
+    enum: ['image', 'text', 'cross-modal', 'hybrid'],
     required: true
   },
   chatRoomId: {
