@@ -52,7 +52,7 @@ exports.findMatches = async (newItem) => {
       // Calculate text similarity (always needed)
       const text1 = `${newItem.title} ${newItem.description}`;
       const text2 = `${candidate.title} ${candidate.description}`;
-      const textScore = calculateTextSimilarity(text1, text2);
+      const textScore = calculateTextSimilarity(text1, text2, newItem.title, candidate.title);
       console.log(`      Text similarity: ${(textScore * 100).toFixed(2)}%`);
 
       // Both items have images: Average of image + text similarity
@@ -143,10 +143,7 @@ const createMatch = async (item1, item2, matchScore, matchType) => {
   }
 };
 
-const calculateTextSimilarity = (text1, text2) => {
-  // Enhanced semantic text similarity with contextual understanding
-  
-  // Common synonyms and related terms for lost & found items
+const calculateTextSimilarity = (text1, text2, title1 = '', title2 = '') => {
   const synonymGroups = {
     phone: ['phone', 'mobile', 'cell', 'smartphone', 'iphone', 'android', 'device'],
     bottle: ['bottle', 'flask', 'container', 'thermos', 'tumbler'],
@@ -157,82 +154,49 @@ const calculateTextSimilarity = (text1, text2) => {
     laptop: ['laptop', 'computer', 'notebook', 'macbook'],
     card: ['card', 'id', 'license', 'credit', 'debit'],
     glasses: ['glasses', 'spectacles', 'eyeglasses', 'sunglasses', 'shades'],
-    jewelry: ['jewelry', 'ring', 'necklace', 'bracelet', 'earring', 'pendant']
-  };
-  
-  const normalize = (text) => {
-    return text
-      .toLowerCase()
-      .replace(/[^\w\s]/g, '') // Remove punctuation
-      .split(/\s+/)
-      .filter(word => word.length > 2); // Remove short words
+    jewelry: ['jewelry', 'ring', 'necklace', 'bracelet', 'earring', 'pendant'],
+    earphones: ['earpods', 'earphones', 'earbuds', 'headphones', 'airpods', 'headset'],
+    charger: ['charger', 'adapter', 'cable', 'charging', 'power']
   };
 
-  const words1 = normalize(text1);
-  const words2 = normalize(text2);
-  
-  // Expand words with synonyms for semantic matching
+  const normalize = (text) => text.toLowerCase()
+    .replace(/[^\w\s]/g, '').split(/\s+/).filter(w => w.length > 1);
+
   const expandWithSynonyms = (words) => {
     const expanded = new Set(words);
     words.forEach(word => {
       Object.values(synonymGroups).forEach(group => {
-        if (group.includes(word)) {
-          group.forEach(syn => expanded.add(syn));
-        }
+        if (group.includes(word)) group.forEach(syn => expanded.add(syn));
       });
     });
     return expanded;
   };
-  
-  const expandedSet1 = expandWithSynonyms(words1);
-  const expandedSet2 = expandWithSynonyms(words2);
-  
-  // Calculate semantic Jaccard similarity with synonym expansion
-  const intersection = new Set([...expandedSet1].filter(x => expandedSet2.has(x)));
-  const union = new Set([...expandedSet1, ...expandedSet2]);
-  const semanticJaccard = intersection.size / union.size;
-  
-  // Calculate exact word frequency overlap (TF-based cosine)
-  const freq1 = {};
-  const freq2 = {};
-  
-  words1.forEach(w => freq1[w] = (freq1[w] || 0) + 1);
-  words2.forEach(w => freq2[w] = (freq2[w] || 0) + 1);
-  
-  let dotProduct = 0;
-  let mag1 = 0;
-  let mag2 = 0;
-  
-  const allUniqueWords = new Set([...words1, ...words2]);
-  allUniqueWords.forEach(word => {
-    const f1 = freq1[word] || 0;
-    const f2 = freq2[word] || 0;
-    dotProduct += f1 * f2;
-    mag1 += f1 * f1;
-    mag2 += f2 * f2;
-  });
-  
-  const exactCosine = mag1 && mag2 ? dotProduct / (Math.sqrt(mag1) * Math.sqrt(mag2)) : 0;
-  
-  // N-gram similarity for partial word matches (e.g., "milton" matches "milton steel")
-  const getNgrams = (words, n = 2) => {
-    const ngrams = [];
-    for (let i = 0; i <= words.length - n; i++) {
-      ngrams.push(words.slice(i, i + n).join(' '));
-    }
-    return ngrams;
+
+  const jaccardScore = (set1, set2) => {
+    const intersection = new Set([...set1].filter(x => set2.has(x)));
+    const union = new Set([...set1, ...set2]);
+    return union.size > 0 ? intersection.size / union.size : 0;
   };
-  
-  const bigrams1 = new Set(getNgrams(words1, 2));
-  const bigrams2 = new Set(getNgrams(words2, 2));
-  const bigramIntersection = new Set([...bigrams1].filter(x => bigrams2.has(x)));
-  const bigramUnion = new Set([...bigrams1, ...bigrams2]);
-  const ngramScore = bigramUnion.size > 0 ? bigramIntersection.size / bigramUnion.size : 0;
-  
-  // Weighted combination: semantic understanding + exact matches + partial matches
-  const finalScore = (semanticJaccard * 0.5) + (exactCosine * 0.3) + (ngramScore * 0.2);
-  
-  console.log(`      📊 Semantic: ${(semanticJaccard * 100).toFixed(2)}%, Exact: ${(exactCosine * 100).toFixed(2)}%, N-gram: ${(ngramScore * 100).toFixed(2)}%, Final: ${(finalScore * 100).toFixed(2)}%`);
-  
+
+  // Title similarity (most important)
+  const titleWords1 = expandWithSynonyms(normalize(title1 || text1));
+  const titleWords2 = expandWithSynonyms(normalize(title2 || text2));
+  const titleScore = jaccardScore(titleWords1, titleWords2);
+
+  // Full text similarity
+  const words1 = expandWithSynonyms(normalize(text1));
+  const words2 = expandWithSynonyms(normalize(text2));
+  const textScore = jaccardScore(words1, words2);
+
+  // Boost: if any key word from title1 appears in title2, add bonus
+  const titleWords1Arr = normalize(title1 || text1);
+  const titleWords2Arr = normalize(title2 || text2);
+  const titleOverlap = titleWords1Arr.filter(w => titleWords2Arr.includes(w)).length;
+  const titleBonus = titleOverlap > 0 ? Math.min(titleOverlap * 0.15, 0.4) : 0;
+
+  // Final: title is 60%, full text 40%, plus title keyword bonus
+  const finalScore = Math.min((titleScore * 0.6) + (textScore * 0.4) + titleBonus, 1.0);
+
+  console.log(`      📊 Title: ${(titleScore*100).toFixed(1)}%, Text: ${(textScore*100).toFixed(1)}%, Bonus: ${(titleBonus*100).toFixed(1)}%, Final: ${(finalScore*100).toFixed(1)}%`);
   return finalScore;
 };
