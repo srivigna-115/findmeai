@@ -49,31 +49,30 @@ exports.findMatches = async (newItem) => {
                                 Array.isArray(candidate.imageEmbedding) && 
                                 candidate.imageEmbedding.length > 0;
 
-      // Calculate text similarity (always needed)
+      // Calculate text similarity using title + description
       const text1 = `${newItem.title} ${newItem.description}`;
       const text2 = `${candidate.title} ${candidate.description}`;
       const textScore = calculateTextSimilarity(text1, text2, newItem.title, candidate.title);
       console.log(`      Text similarity: ${(textScore * 100).toFixed(2)}%`);
 
-      // Both items have images: use best of image or text
+      // Both items have images: combine image + text
       if (hasNewItemImage && hasCandidateImage) {
         try {
           const rawImageScore = cosineSimilarity(newItem.imageEmbedding, candidate.imageEmbedding);
           const imageScore = Math.max(0, rawImageScore);
           console.log(`      Image similarity: ${(imageScore * 100).toFixed(2)}%`);
-          // Use best score between image and text
-          matchScore = Math.max(imageScore, textScore);
+          // Weight: 60% text (description matters most) + 40% image
+          matchScore = (textScore * 0.6) + (imageScore * 0.4);
+          // But if either is very high, boost the score
+          matchScore = Math.max(matchScore, textScore * 0.9, imageScore * 0.9);
           matchType = 'hybrid';
         } catch (error) {
           matchScore = textScore;
           matchType = 'text';
         }
-      }
-      // Only one or no images: Use text similarity only
-      else {
+      } else {
         matchScore = textScore;
         matchType = 'text';
-        console.log(`      Using text-only matching`);
       }
 
       // Check threshold
