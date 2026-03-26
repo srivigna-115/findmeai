@@ -57,8 +57,12 @@ exports.createItem = async (req, res, next) => {
 
     const item = await Item.create(itemData);
 
-    // Trigger async matching
-    findMatches(item).catch(err => console.error('Matching error:', err));
+    // Trigger async matching - populate user first to ensure matching works
+    Item.findById(item._id).populate('user', '_id name email').then(populatedItem => {
+      if (populatedItem) {
+        findMatches(populatedItem).catch(err => console.error('Matching error:', err));
+      }
+    }).catch(err => console.error('Error populating item for matching:', err));
 
     res.status(201).json({ success: true, item });
   } catch (error) {
