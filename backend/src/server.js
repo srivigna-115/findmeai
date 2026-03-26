@@ -33,9 +33,13 @@ app.use(helmet({
 }));
 
 app.use(cors({
-  origin: ["http://localhost:3000", "http://localhost:3001", process.env.CLIENT_URL, "*"].filter(Boolean),
-  credentials: true
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: false
 }));
+
+app.options('*', cors());
 
 app.use(compression());
 app.use(morgan('combined'));
