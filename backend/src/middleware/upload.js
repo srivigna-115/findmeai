@@ -4,7 +4,7 @@ const path = require('path');
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = process.env.ALLOWED_FILE_TYPES.split(',');
+  const allowedTypes = (process.env.ALLOWED_FILE_TYPES || 'image/jpeg,image/png,image/jpg,audio/webm,audio/wav').split(',');
   
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
