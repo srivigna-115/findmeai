@@ -33,7 +33,7 @@ app.use(helmet({
 }));
 
 app.use(cors({
-  origin: "*",
+  origin: ["http://localhost:3000", "http://localhost:3001", process.env.CLIENT_URL, "*"].filter(Boolean),
   credentials: true
 }));
 
